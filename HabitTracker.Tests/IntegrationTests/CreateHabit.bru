@@ -1,0 +1,18 @@
+meta {
+  name: CreateHabit
+  type: http
+  seq: 3
+}
+
+post {
+  url: https://localhost:7147/HabitTracker
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Walking",
+    "description": "30 minutes of walking everyday"
+  }
+}

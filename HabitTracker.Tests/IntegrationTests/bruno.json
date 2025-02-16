@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "HabitTracker",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

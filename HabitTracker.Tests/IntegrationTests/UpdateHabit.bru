@@ -1,0 +1,19 @@
+meta {
+  name: UpdateHabit
+  type: http
+  seq: 4
+}
+
+put {
+  url: https://localhost:7147/HabitTracker/4
+  body: json
+  auth: none
+}
+
+body:json {
+  { 
+    "name": "walking",
+    "description": "10 minutes",
+    "streakCompletedDate": "2025-01-15T11:09:14Z"
+  }
+}
