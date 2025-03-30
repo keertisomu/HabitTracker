@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: habit-tracker-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=habittracker
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - habit-tracker-network
+
+  # habittracker-api:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: habit-tracker-api
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ConnectionStrings__DefaultConnection=Host=postgres;Database=habittracker;Username=postgres;Password=postgres
+  #   ports:
+  #     - "8080:80"
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - habit-tracker-network
+
+networks:
+  habit-tracker-network:
+    driver: bridge
+
+volumes:
+  postgres-data:

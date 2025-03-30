@@ -11,13 +11,13 @@ namespace HabitTracker.Controllers
     [Route("[controller]")]
     public class HabitTrackerController : ControllerBase
     {
-
         private readonly HabitTrackerDbContext _context;
         private readonly StreakCalculationService _streakService;
 
         public HabitTrackerController(
             HabitTrackerDbContext context,
-            StreakCalculationService streakService)
+            StreakCalculationService streakService
+        )
         {
             _context = context;
             _streakService = streakService;
@@ -27,8 +27,8 @@ namespace HabitTracker.Controllers
         public async Task<ActionResult<IEnumerable<HabitResponse>>> GetHabits()
         {
             var currentDate = DateTime.UtcNow.Date;
-            var habits = await _context.Habits
-                .Include(h => h.Streaks)
+            var habits = await _context
+                .Habits.Include(h => h.Streaks)
                 .Select(h => new HabitResponse
                 {
                     Id = h.Id,
@@ -37,7 +37,7 @@ namespace HabitTracker.Controllers
                     Streak = _streakService.CalculateCurrentStreak(
                         h.Streaks.Select(s => s.HabitCompletedDate),
                         currentDate
-                    )
+                    ),
                 })
                 .ToListAsync();
 
@@ -52,7 +52,7 @@ namespace HabitTracker.Controllers
                 Name = request.Name,
                 Description = request.Description,
                 CreatedDate = DateTime.UtcNow,
-                UpdatedDate = DateTime.UtcNow
+                UpdatedDate = DateTime.UtcNow,
             };
 
             _context.Habits.Add(habit);
@@ -65,15 +65,16 @@ namespace HabitTracker.Controllers
                     Id = habit.Id,
                     Name = habit.Name,
                     Description = habit.Description,
-                    Streak = 0
-                });
+                    Streak = 0,
+                }
+            );
         }
 
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateHabitStreak(int id, UpdateHabitStreakRequest request)
         {
-            var habit = await _context.Habits
-                .Include(h => h.Streaks)
+            var habit = await _context
+                .Habits.Include(h => h.Streaks)
                 .FirstOrDefaultAsync(h => h.Id == id);
 
             if (habit == null)
@@ -85,7 +86,7 @@ namespace HabitTracker.Controllers
                 {
                     HabitId = habit.Id,
                     HabitCompletedDate = request.StreakCompletedDate.Value.Date,
-                    CreatedDate = DateTime.UtcNow
+                    CreatedDate = DateTime.UtcNow,
                 };
 
                 _context.Streaks.Add(streak);
@@ -130,7 +131,5 @@ namespace HabitTracker.Controllers
 
             return NoContent();
         }
-
-
     }
 }

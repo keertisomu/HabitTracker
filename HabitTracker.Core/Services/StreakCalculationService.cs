@@ -8,9 +8,13 @@ namespace HabitTracker.Core.Services
 {
     public class StreakCalculationService
     {
-        public int CalculateCurrentStreak(IEnumerable<DateTime> satisfiedDates, DateTime currentDate)
+        public int CalculateCurrentStreak(
+            IEnumerable<DateTime> satisfiedDates,
+            DateTime currentDate
+        )
         {
-            if (!satisfiedDates.Any()) return 0;
+            if (!satisfiedDates.Any())
+                return 0;
 
             var orderedDates = satisfiedDates.OrderByDescending(d => d.Date).ToList();
 
