@@ -1,10 +1,7 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Reflection.Emit;
-using HabitTracker.Core.Models.Domain;
+﻿using HabitTracker.Core.Models.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace HabitTracker
+namespace HabitTracker.Core
 {
     public class HabitTrackerDbContext : DbContext
     {

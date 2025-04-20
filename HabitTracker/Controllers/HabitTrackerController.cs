@@ -1,7 +1,9 @@
+using HabitTracker.Core;
 using HabitTracker.Core.Models.Domain;
 using HabitTracker.Core.Models.Request;
 using HabitTracker.Core.Models.Response;
 using HabitTracker.Core.Services;
+using HabitTracker.Mapping;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,125 +13,56 @@ namespace HabitTracker.Controllers
     [Route("[controller]")]
     public class HabitTrackerController : ControllerBase
     {
-        private readonly HabitTrackerDbContext _context;
-        private readonly StreakCalculationService _streakService;
+        private readonly IHabitTrackerService _habitService;
 
-        public HabitTrackerController(
-            HabitTrackerDbContext context,
-            StreakCalculationService streakService
-        )
+        public HabitTrackerController(IHabitTrackerService habitService)
         {
-            _context = context;
-            _streakService = streakService;
+            _habitService = habitService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<HabitResponse>>> GetHabits()
         {
-            var currentDate = DateTime.UtcNow.Date;
-            var habits = await _context
-                .Habits.Include(h => h.Streaks)
-                .Select(h => new HabitResponse
-                {
-                    Id = h.Id,
-                    Name = h.Name,
-                    Description = h.Description,
-                    Streak = _streakService.CalculateCurrentStreak(
-                        h.Streaks.Select(s => s.HabitCompletedDate),
-                        currentDate
-                    ),
-                })
-                .ToListAsync();
-
-            return Ok(habits);
+            var habits = await _habitService.GetAllHabitsAsync();
+            return Ok(habits.MapToResponse());
         }
 
         [HttpPost]
         public async Task<ActionResult<HabitResponse>> CreateHabit(CreateHabitRequest request)
         {
-            var habit = new Habit
-            {
-                Name = request.Name,
-                Description = request.Description,
-                CreatedDate = DateTime.UtcNow,
-                UpdatedDate = DateTime.UtcNow,
-            };
+            var habit = request.MapToHabit();
 
-            _context.Habits.Add(habit);
-            await _context.SaveChangesAsync();
+            var createdHabit = await _habitService.CreateHabitAsync(habit);
+            var habitResponse = createdHabit.MapToResponse();
 
-            return CreatedAtAction(
-                nameof(GetHabits),
-                new HabitResponse
-                {
-                    Id = habit.Id,
-                    Name = habit.Name,
-                    Description = habit.Description,
-                    Streak = 0,
-                }
-            );
+            return CreatedAtAction(nameof(GetHabits), habitResponse);
         }
 
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateHabitStreak(int id, UpdateHabitStreakRequest request)
         {
-            var habit = await _context
-                .Habits.Include(h => h.Streaks)
-                .FirstOrDefaultAsync(h => h.Id == id);
+            var updated = await _habitService.UpdateHabitStreakAsync(
+                id,
+                request.StreakCompletedDate
+            );
 
-            if (habit == null)
-                return NotFound();
-
-            if (request.StreakCompletedDate.HasValue)
-            {
-                var streak = new Streak
-                {
-                    HabitId = habit.Id,
-                    HabitCompletedDate = request.StreakCompletedDate.Value.Date,
-                    CreatedDate = DateTime.UtcNow,
-                };
-
-                _context.Streaks.Add(streak);
-            }
-
-            habit.UpdatedDate = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return updated ? NoContent() : NotFound();
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateHabit(int id, UpdateHabitRequest request)
         {
-            var habit = await _context.Habits.FindAsync(id);
+            var habit = request.MapToHabit(id);
+            var updated = await _habitService.UpdateHabitAsync(id, habit);
 
-            if (habit == null)
-                return NotFound();
-
-            if (request.Name != null)
-                habit.Name = request.Name;
-
-            if (request.Description != null)
-                habit.Description = request.Description;
-
-            habit.UpdatedDate = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return updated != null ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteHabit(int id)
         {
-            var habit = await _context.Habits.FindAsync(id);
-
-            if (habit == null)
-                return NotFound();
-
-            _context.Habits.Remove(habit);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            var deleted = await _habitService.DeleteHabitAsync(id);
+            return deleted ? NoContent() : NotFound();
         }
     }
 }

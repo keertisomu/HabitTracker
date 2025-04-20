@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace HabitTracker.Core.Services
 {
-    public class StreakCalculationService
+    public class StreakCalculationService : IStreakCalculationService
     {
         public int CalculateCurrentStreak(
             IEnumerable<DateTime> satisfiedDates,
             DateTime currentDate
         )
         {
-            if (!satisfiedDates.Any())
+            if (satisfiedDates is null || !satisfiedDates.Any())
                 return 0;
 
             var orderedDates = satisfiedDates.OrderByDescending(d => d.Date).ToList();
@@ -39,5 +39,11 @@ namespace HabitTracker.Core.Services
 
             return streak;
         }
+    }
+
+    // create an inteface for the service
+    public interface IStreakCalculationService
+    {
+        int CalculateCurrentStreak(IEnumerable<DateTime> satisfiedDates, DateTime currentDate);
     }
 }

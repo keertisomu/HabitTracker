@@ -1,4 +1,4 @@
 public class UpdateHabitStreakRequest
 {
-    public DateTime? StreakCompletedDate { get; set; }
+    public DateTime StreakCompletedDate { get; set; }
 }

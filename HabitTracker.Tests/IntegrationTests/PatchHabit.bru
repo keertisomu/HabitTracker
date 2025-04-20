@@ -1,0 +1,17 @@
+meta {
+  name: PatchHabit
+  type: http
+  seq: 5
+}
+
+patch {
+  url: https://localhost:7147/HabitTracker/2
+  body: json
+  auth: none
+}
+
+body:json {
+  { 
+    "StreakCompletedDate": "2025-04-20T10:32:13.784Z"
+  }
+}

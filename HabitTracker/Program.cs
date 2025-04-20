@@ -1,4 +1,4 @@
-using HabitTracker;
+using HabitTracker.Core;
 using HabitTracker.Core.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +14,8 @@ builder.Services.AddSwaggerGen();
 
 var connString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddDbContext<HabitTrackerDbContext>(options => options.UseNpgsql(connString));
+builder.Services.AddDatabase(connString);
+builder.Services.AddApplication();
 builder.Services.AddScoped<StreakCalculationService>();
 
 var app = builder.Build();
